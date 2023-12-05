@@ -17,18 +17,20 @@ function toDoList (props) {
 
     // створення DOM
     const setNewTask = (task) => {
+        const { valueTask, isChecked } = task;
 
         const taskElement = document.createElement('li')
         taskElement.classList.add('todo-item')
         listTasks.appendChild(taskElement);
 
         const checkboxElement = document.createElement('input')
-        checkboxElement.type ="checkbox"
+        checkboxElement.type ="checkbox";
+        checkboxElement.checked = isChecked;
         taskElement.appendChild(checkboxElement);
 
         const textElement = document.createElement('span')
         textElement.classList.add('todo-item__description')
-        textElement.innerText = task;
+        textElement.innerText = valueTask;
         taskElement.appendChild(textElement);
 
         const delBut = document.createElement('button');
@@ -43,15 +45,31 @@ function toDoList (props) {
         });
 
         // відзначення задачі викононаною
-        checkboxElement.addEventListener('click', () => {
-            textElement.classList.add('todo-item--checked');
+        checkboxElement.addEventListener('change', () => {
+            if(checkboxElement.checked) {
+                textElement.classList.add('todo-item--checked');
+            } else {
+                textElement.classList.remove('todo-item--checked');
+            }
+            updateCheckedStatusInLocalStorage (task, checkboxElement.checked)
+
         })
     }
+    const updateCheckedStatusInLocalStorage = (task, isChecked) => {
+        const tasks = JSON.parse(localStorage.getItem(KEY));
+        const taskIndex = tasks.findIndex((item) => item.valueTask === task.valueTask);
+        console.log(taskIndex)
+
+        if (taskIndex !== -1) {
+            tasks[taskIndex].isChecked = isChecked;
+            localStorage.setItem(KEY, JSON.stringify(tasks));
+        }
+    };
 
     //видалення задачі з Local storage
     const removeFromLocalStorage = (task) => {
         const tasks = JSON.parse(localStorage.getItem(KEY));
-        const newTasks = tasks.filter((item) => item !== task);
+        const newTasks = tasks.filter((item) => item.valueTask !== task.valueTask);
         localStorage.setItem(KEY, JSON.stringify(newTasks));
     };
 
@@ -59,20 +77,30 @@ function toDoList (props) {
     const getDataFromLoad = () => {
         const tasks = JSON.parse(localStorage.getItem(KEY));
         if (tasks !== null) {
-            tasks.forEach(setNewTask)
+            tasks.forEach((task) => {
+                setNewTask(task)
+
+                const taskElement = listTasks.lastChild;
+                console.log(taskElement)
+                if (task.isChecked) {
+                    taskElement.querySelector('.todo-item__description').classList.add('todo-item--checked');
+                }
+            })
         }
     }
 
     //додання нової задачі в todo list
     addTaskButton.addEventListener('click', function(event) {
         event.preventDefault();
-        const textTask = form.elements.value.value;
-        setNewTask (textTask)
-        setToLocalData(textTask)
+        const taskData = {
+            valueTask: form.elements.value.value,
+            isChecked: false
+        };
+        setNewTask (taskData)
+        setToLocalData(taskData)
     })
 
     getDataFromLoad()
-
 }
 
 document.addEventListener('DOMContentLoaded', ()=> {
@@ -82,3 +110,6 @@ document.addEventListener('DOMContentLoaded', ()=> {
         listTasks: document.querySelector('.js--todos-wrapper'),
     })
 })
+
+
+
