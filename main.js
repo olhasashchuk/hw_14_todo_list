@@ -46,20 +46,15 @@ function toDoList (props) {
 
         // відзначення задачі викононаною
         checkboxElement.addEventListener('change', () => {
-            if(checkboxElement.checked) {
-                textElement.classList.add('todo-item--checked');
-            } else {
-                textElement.classList.remove('todo-item--checked');
-            }
+            checkboxElement.checked
+                ? textElement.classList.add('todo-item--checked')
+                : textElement.classList.remove('todo-item--checked')
             updateCheckedStatusInLocalStorage (task, checkboxElement.checked)
-
         })
     }
     const updateCheckedStatusInLocalStorage = (task, isChecked) => {
         const tasks = JSON.parse(localStorage.getItem(KEY));
         const taskIndex = tasks.findIndex((item) => item.valueTask === task.valueTask);
-        console.log(taskIndex)
-
         if (taskIndex !== -1) {
             tasks[taskIndex].isChecked = isChecked;
             localStorage.setItem(KEY, JSON.stringify(tasks));
@@ -81,7 +76,6 @@ function toDoList (props) {
                 setNewTask(task)
 
                 const taskElement = listTasks.lastChild;
-                console.log(taskElement)
                 if (task.isChecked) {
                     taskElement.querySelector('.todo-item__description').classList.add('todo-item--checked');
                 }
